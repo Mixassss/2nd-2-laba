@@ -11,25 +11,25 @@ string infixToPostfix(const string& infix) { //Функция для преоб�
     Stack stack;
     string output;
 
-    for(char token : infix) {
-        if((token >= '0' && token <= '9') || (token >= 'a' && token <= 'z') || (token >= 'A' && token <= 'Z')) { //Проверяем если операнд цифра или буква, то добавляем его в строку
-            output += token;
-        } else if (token == '('){
-            stack.push(string(1, token));
-        } else if(token == ')') {
+    for(char operand : infix) {
+        if((operand >= '0' && operand <= '9') || (operand >= 'a' && operand <= 'z') || (operand >= 'A' && operand <= 'Z')) { //Проверяем если операнд цифра или буква, то добавляем его в строку
+            output += operand;
+        } else if (operand == '('){ // Если операнд открывающая скобка, помещаем ее в стек
+            stack.push(string(1, operand));
+        } else if(operand == ')') { // Если операнд закрывающая скобка, извлекаем из стека до открывающей скобки
             while(!stack.isEmpty() && stack.peek() != "(") {
                 output +=stack.pop();
             }
-            stack.pop();
-        } else {
-            while(!stack.isEmpty() && priority(stack.peek()[0]) >= priority(token)) {
+            stack.pop(); // Удаляем '(' из стека
+        } else { // Если токен — оператор
+            while(!stack.isEmpty() && priority(stack.peek()[0]) >= priority(operand)) {
                 output += stack.pop();
             }
-            stack.push(string(1, token));
+            stack.push(string(1, operand));
         } 
     }
 
-    while(!stack.isEmpty()) {
+    while(!stack.isEmpty()) { // Извлекаем оставшиеся операторы из стека
         output += stack.pop();
     }
     return output;
