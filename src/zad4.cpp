@@ -1,3 +1,4 @@
+// VAR 5
 #include "array.cpp"
 
 bool hasCorrectWord(const string& word, Array& dictionary) {
