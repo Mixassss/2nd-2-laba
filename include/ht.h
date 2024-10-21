@@ -27,6 +27,4 @@ struct Hash_table {
     bool remove(const string& key);
 };
 
-#include "../src/hash_table.cpp"
-
 #endif // HT_H
