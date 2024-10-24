@@ -23,6 +23,9 @@ struct Set {
     bool remove(int key);
     bool haveElement(int key);
     void print();
+    Set unificateWith(Set& other);
+    Set interWith(Set& other);
+    Set diffWith(Set& other);
 };
 
 #endif // SET_H
