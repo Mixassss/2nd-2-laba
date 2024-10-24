@@ -1,3 +1,4 @@
+// VAR 3
 #include "hash_table.cpp"
 
 pair<int, string> lengthOfLongestSubstring(const string& s) {

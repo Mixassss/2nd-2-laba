@@ -1,3 +1,4 @@
+// VAR 1
 #include "../include/tree.h"
 
 NodeT::NodeT(int value) {

@@ -17,12 +17,12 @@ Set::~Set() {
   }
 }
 
-size_t hashFunction(int& key) {
+size_t hashFunction(int key) {
   hash<int> hasher;
   return hasher(key) % SIZE;
 }
 
-void Set::add(int& key) {
+void Set::add(int key) {
   if (haveElement(key)) return; // Проверка наличия элемента перед добавлением
 
   size_t hashValue = hashFunction(key); // Хэш значение для этого ключа
@@ -39,10 +39,7 @@ void Set::add(int& key) {
       previous = current;
       current = current->next;
     }
-    if (current != nullptr && current->key == key) { // Если текущий узел имеет тот же ключ, ничего не делаем
-      delete newPair; // Удаляем временный узел
-      return;
-    }
+
     if (previous == nullptr) { // Вставка нового узла в нужное место
       newPair->next = table[hashValue]; // Вставляем в начало списка
       table[hashValue] = newPair; 
@@ -54,7 +51,7 @@ void Set::add(int& key) {
   }
 }
 
-void Set::remove(int& key) {
+bool Set::remove(int key) {
     size_t index = hashFunction(key);
     pNode* current = table[index];
     pNode* previous = nullptr;
@@ -68,14 +65,15 @@ void Set::remove(int& key) {
             }
             delete current; // Освобождаем память
             elementCount--;
-            return;
+            return true; // Элемент успешно удален
         }
         previous = current;
         current = current->next;
     }
+    return false; // Элемент не найден
 }
 
-bool Set::haveElement(int& key) {
+bool Set::haveElement(int key) {
     size_t index = hashFunction(key);
     pNode* current = table[index];
     while(current != nullptr) {
@@ -130,86 +128,94 @@ void write(string& path, string& text) { // Функция записи данн
   fout.close();
 }
 
-Set setReadFile(string& path, string& nameStruct) {
-  Set data;
-  string str;
+Set setReadFile(string& path, string& name) {
+   Set nums; // Предполагается, что у вас есть конструктор по умолчанию для Set
+    ifstream fin(path);
+    if (!fin.is_open()) {
+        cout << "Не удалось открыть файл для чтения" << endl;
+        return nums; // Возвращаем пустое множество, если не удалось открыть файл
+    }
 
-  ifstream fin(path);
-  if (!fin.is_open()) {
-    cout << "Не удалось открыть файл для чтения" << endl;
-    return data; // Возвращаем пустой массив, если не удалось открыть файл
-  }
-
-  while (getline(fin, str)) {
+    string str;
+    while (getline(fin, str)) {
     stringstream ss(str);
     string tokens;
     getline(ss, tokens, ' ');
-    if (tokens == nameStruct) { // Проверяем на совпадение с нужной структурой
-      while (getline(ss, tokens, ' ')) {
-                int position = tokens.find_first_of(':');
-                tokens.replace(position, 1, " ");
-                stringstream iss(tokens);
-                int key;
-                iss >> key;
-                data.add(key);
-            }
+    if (tokens == name) { // Если строка соответствует имени структуры
+        int key;
+        while (ss >> key) { // Читаем все ключи из строки
+            nums.add(key);
+        }
+        break; // Прерываем цикл после нахождения нужной структуры
+      }
     }
-  }
-  fin.close();
-  return data;
+
+    fin.close();
+    return nums; // Возвращаем считанное множество
 }
 
 string printHashTable( Set& set, string& name) { // Функция для перебора всех элементов хеш-таблицы
-    string str = name + ' ';
+string str = name + ' ';
+    bool first = true; // Флаг для управления запятыми
+
     for (int i = 0; i < SIZE; ++i) {
         pNode* current = set.table[i];
         while (current) {
-            str += to_string(current->key) + ':';
+            if (!first) {
+                str += ' '; // Добавляем пробел перед элементом, если это не первый элемент
+            }
+            str += to_string(current->key);
             current = current->next;
+            first = false; // После первого элемента флаг меняется
         }
     }
+
     return str;
 }
 
 void SETADD (string& name, string& value, string& path) {
   string textfull = Ftext(path, name);
     Set nums = setReadFile(path, name);
+
+    int key = stoi(value);
+    nums.add(key);
     
-    string str;
-    if (nums.elementCount != 0) {
-      int key = stoi(value);
-        nums.add(key);
-        textfull += printHashTable(nums, name);
-        write(path, textfull);
-    } else {
-        int key = stoi(value);
-        textfull += name + ' ' + to_string(key) + ':' + value + "\n";
-        write(path, textfull);
-    }
-}
+    // Получаем строку со всеми элементами множества
+    textfull += printHashTable(nums, name); 
+    
+    write(path, textfull); // Записываем обновленное состояние в файл
+} 
 
 void SETDEL (string& name, string& path, string& value) {
-  Set data = setReadFile(path, name);
-    
-  if (data.elementCount == 0) {
-    throw out_of_range("Ошибка: нет такого списка или он пуст");
-  }
+      Set data = setReadFile(path, name);
 
-  int key = stoi(value);
-    data.remove(key);
-    
-    string textfull = Ftext(path, name);
-    
-    string str = name + ' ';
-    pNode* current = data.table[hashFunction(key)];
-    
-    while (current) {
-        str += to_string(current->key) + ' ';
-        current = current->next;
+    if (data.elementCount == 0) {
+        throw out_of_range("Ошибка: нет такого списка или он пуст");
     }
-    
+
+    int key = stoi(value);
+
+    // Удаляем элемент из множества
+    if (!data.remove(key)) {
+        cerr << "Ошибка: элемент " << key << " не найден в множестве." << endl;
+        return; // Если элемент не найден, просто выходим
+    }
+
+    // Формируем текст для записи в файл без удаленного элемента
+    string textfull = Ftext(path, name);
+
+    // Добавляем обновленное множество в текст
+    string str = name + ' ';
+    for (int i = 0; i < SIZE; ++i) {
+        pNode* current = data.table[i];
+        while (current) {
+            str += to_string(current->key) + ' '; // Добавляем пробел между элементами
+            current = current->next;
+        }
+    }
+
     textfull += str;
-    write(path, textfull);
+    write(path, textfull); // Записываем обновленное состояние в файл
 }
 
 bool SETHAS(string& name, string& path, string& value) {

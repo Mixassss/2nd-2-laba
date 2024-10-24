@@ -10,7 +10,7 @@ struct pNode {
     pNode* next;
 
      // Конструктор для удобства создания узлов
-    pNode(const int& k) : key(k), next(nullptr) {}
+    pNode(int& k) : key(k), next(nullptr) {}
 };
 
 struct Set {
@@ -19,9 +19,9 @@ struct Set {
     Set();
     ~Set();
 
-    void add(int& key);
-    void remove(int& key);
-    bool haveElement(int& key);
+    void add(int key);
+    bool remove(int key);
+    bool haveElement(int key);
     void print();
 };
 
