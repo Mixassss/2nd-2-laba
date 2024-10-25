@@ -31,6 +31,7 @@ Set Set::interWith(Set& other) {
             if (other.haveElement(current->key)) { // Если элемент в множестве есть
                 result.add(current->key); // То выводим повторяющийся элемент
             }
+            current = current->next; // Перемещаемся к следующему элементу
         }
     }
     return result; // Возвращаем результат
@@ -52,32 +53,25 @@ Set Set::diffWith(Set& other) {
 }
 
 int main() {
-    Set set1;
+Set set1;
+    int element;
 
-    int N;
-    cout << "Введите кол-во элементов, которые будут в первом множестве: ";
-    cin >> N;
-    for (int i; i < N; ++i) {
-        int element;
-        cout << "Введите элементы: " << i + 1 << ": ";
-        cin >> element;
+    cout << "Введите элементы для первого множества: ";
+    while (cin >> element && element != 0) {
         set1.add(element);
     }
 
     Set set2;
-    cout << "Введите кол-во элементов, которые будут в втором множестве: ";
-    cin >> N;
-    for (int i; i < N; ++i) {
-        int element;
-        cout << "Введите элементы: " << i + 1 << ": ";
-        cin >> element;
+
+    cout << "Введите элементы для второго множества: ";
+    while (cin >> element && element != 0) {
         set2.add(element);
     }
 
-    cout << "Первое множество: "; // Вывод первого множества
+    cout << "Первое множество: ";
     set1.print();
 
-    cout << "Второе множество: "; // Вывод второго множества
+    cout << "Второе множество: ";
     set2.print();
 
     Set unifSet = set1.unificateWith(set2);

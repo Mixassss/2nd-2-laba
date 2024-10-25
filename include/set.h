@@ -28,4 +28,6 @@ struct Set {
     Set diffWith(Set& other);
 };
 
+#include "../src/atd_zad2.cpp"
+
 #endif // SET_H
